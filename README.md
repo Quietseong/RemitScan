@@ -1,3 +1,4 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Quietseong/RemitScan)
 
 ## 📌 Project Name: RemitScan
 
