@@ -1,40 +1,50 @@
-# app/main.py
+# 파일명: main.py
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse, Response
+from starlette.middleware.wsgi import WSGIMiddleware
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, make_wsgi_app
+from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST
+import json
+import os
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+app = FastAPI()
 
-# 각 기능별 라우터 import
-from routes import (
-    registration_risk,
-    # account_risk,
-    # transaction_risk,
-    # aml_evaluation,
-    # behavioral_score,
-    # system_monitor,
-    # audit_log
-)
+# Prometheus 메트릭 정의
+PSI_GAUGE = Gauge('data_drift_psi', 'Population Stability Index')
+KS_PVAL_GAUGE = Gauge('data_drift_ks_pval', 'Kolmogorov-Smirnov test p-value')
+JS_DIV_GAUGE = Gauge('data_drift_js_div', 'Jensen-Shannon Divergence')
+WASSERSTEIN_GAUGE = Gauge('data_drift_wasserstein', 'Wasserstein Distance')
 
-app = FastAPI(
-    title="FDS API - 이상거래탐지 시스템",
-    description="신규 가입부터 이상거래 리포트까지 전 과정 탐지 API",
-    version="1.0.0"
-)
+@app.get("/drift-metrics")
+async def get_drift_metrics():
+    """
+    drift_metrics_hourly.json 파일의 데이터 드리프트 결과를 반환하는 API
 
-# CORS 설정 (내부망일 경우 생략 가능)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 보안을 위해 실제 운영 시 도메인 제한
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    Returns:
+        JSONResponse: 시간별 데이터 드리프트 결과
+    Raises:
+        HTTPException: 파일이 없거나 읽기 오류 발생 시
+    """
+    # 상위 디렉토리의 data 폴더를 참조하도록 수정
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "drift_metrics_hourly.json")
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail=f"drift_metrics_hourly.json 파일이 없습니다. 경로: {file_path}")
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        # 가장 최근 데이터로 Prometheus 메트릭 업데이트
+        if data:
+            latest = data[-1]
+            PSI_GAUGE.set(latest['psi'])
+            KS_PVAL_GAUGE.set(latest['ks_pval'])
+            JS_DIV_GAUGE.set(latest['js_div'])
+            WASSERSTEIN_GAUGE.set(latest['wasserstein'])
+            
+        return JSONResponse(content=data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"파일 읽기 오류: {e}")
 
-# ✅ 각 탐지 기능별 라우터 등록
-app.include_router(registration_risk.router, prefix="/risk", tags=["가입 위험 탐지"])
-# app.include_router(account_risk.router, prefix="/risk", tags=["계좌 등록 위험 탐지"])
-# app.include_router(transaction_risk.router, prefix="/risk", tags=["송금 거래 탐지"])
-# app.include_router(behavioral_score.router, prefix="/risk", tags=["행동 기반 위험 점수"])
-
-# app.include_router(aml_evaluation.router, prefix="/aml", tags=["AML 룰 탐지"])
-# app.include_router(system_monitor.router, prefix="/system", tags=["시스템 모니터링"])
-# app.include_router(audit_log.router, prefix="/audit", tags=["감사/리포트 관리"])
+# WSGI 미들웨어로 /metrics 엔드포인트 등록
+app.mount("/metrics", WSGIMiddleware(make_wsgi_app()))
