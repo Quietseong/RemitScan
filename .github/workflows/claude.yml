@@ -9,6 +9,8 @@ on:
     types: [opened, assigned]
   pull_request_review:
     types: [submitted]
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   claude:
@@ -35,3 +37,31 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  claude-pr-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude PR Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            이 PR을 리뷰하고 버그와 보안 이슈만 보고해줘.
+            발견한 버그와 잠재적 취약점에 대해서만 간결하게 작성해줘.
+
+            - 버그나 보안 이슈가 없으면 "발견된 버그 및 보안 이슈 없음"으로만 작성할 것
+            - 코드 스타일, 리팩토링 제안, 개선 사항은 포함하지 말 것
+            - 각 이슈는 파일명과 라인 번호를 포함하여 간결하게 작성할 것
