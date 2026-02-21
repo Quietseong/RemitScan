@@ -39,7 +39,7 @@ https://gratis-catmint-235.notion.site/RemitScan-1dd38a80454880178f56c04edd60683
 
 =======
 
-# RemitScan 모니터링 프로젝트
+# (리팩토링) RemitScan 모니터링 프로젝트
 
 이 프로젝트는 FastAPI 기반의 데이터 드리프트 API, Prometheus 기반의 메트릭 수집, Grafana 대시보드를 통한 실시간 모니터링 환경을 제공합니다.
 
