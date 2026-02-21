@@ -43,6 +43,19 @@ https://gratis-catmint-235.notion.site/RemitScan-1dd38a80454880178f56c04edd60683
 
 이 프로젝트는 FastAPI 기반의 데이터 드리프트 API, Prometheus 기반의 메트릭 수집, Grafana 대시보드를 통한 실시간 모니터링 환경을 제공합니다.
 
+
+---
+
+완성된 대시보드
+상단 영역 (KPI + 드리프트):
+
+Grafana Dashboard Top
+
+하단 영역 (모델 점수 + 규칙 + 히스토그램):
+
+Grafana Dashboard Bottom
+
+
 ---
 
 ## 1. 도커(Docker)로 전체 서비스 실행하기
