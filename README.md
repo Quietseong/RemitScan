@@ -48,12 +48,10 @@ https://gratis-catmint-235.notion.site/RemitScan-1dd38a80454880178f56c04edd60683
 
 완성된 대시보드
 상단 영역 (KPI + 드리프트):
-
-Grafana Dashboard Top
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/23ce064f-8600-4851-81db-d7b62185d20c" />
 
 하단 영역 (모델 점수 + 규칙 + 히스토그램):
-
-Grafana Dashboard Bottom
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bb9cdff4-b38e-47d8-95c8-580756b27c21" />
 
 
 ---
