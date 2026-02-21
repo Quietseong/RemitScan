@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+claude-code-tips/
+
+# Playwright MCP
+.playwright-mcp/
+
+# System
+bash.exe.stackdump
+*.stackdump
+
+# Environment
+.env
+.env.*
